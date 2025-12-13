@@ -1,0 +1,410 @@
+1. What is a Static IP and a Public IP?
+
+Answer:
+A Static IP is an IP address that remains the same and does not change. It is mainly used for servers so that users can always connect using the same IP address. In AWS, an Elastic IP is a static IP.
+
+A Public IP is an IP address that allows a resource to communicate over the internet. It can be static or dynamic. Without a public IP, a server cannot be accessed directly from the internet.
+
+2. What is the difference between a Security Group and a Network ACL (NACL)?
+
+Answer:
+A Security Group works at the instance level and controls traffic to and from EC2 instances. It is stateful, meaning if inbound traffic is allowed, the response traffic is automatically allowed.
+
+A Network ACL (NACL) works at the subnet level and controls traffic for all resources in the subnet. It is stateless, so both inbound and outbound rules must be explicitly defined. NACL supports both allow and deny rules.
+
+3. What are policies in AWS, and what are the types of policies?
+
+Answer:
+AWS policies are permission documents written in JSON that define what actions are allowed or denied on AWS resources.
+
+Types of AWS policies:
+
+Managed Policies – Reusable policies managed by AWS or the user
+
+Inline Policies – Policies attached directly to a single user, group, or role
+
+Resource-based Policies – Policies attached to resources like S3 buckets
+
+Service Control Policies (SCPs) – Used to control permissions in AWS Organizations
+
+4. How do you create S3 Cross-Region Replication (CRR)?
+
+Answer:
+To create S3 Cross-Region Replication:
+
+Enable versioning on both source and destination buckets
+
+Create or use an IAM role with replication permissions
+
+Configure replication rules on the source bucket
+
+Select the destination bucket in another AWS region
+
+CRR automatically copies objects from one bucket to another region.
+
+5. If there are two S3 buckets (Bucket A – source, Bucket B – destination) and a file in Bucket A is accidentally deleted, what happens in Bucket B?
+
+Answer:
+If delete marker replication is not enabled, the file in Bucket B will remain unchanged.
+If delete marker replication is enabled, the delete action will also be replicated and the file will be deleted in Bucket B.
+
+6. Explain what happens in this case.
+
+Answer:
+S3 Cross-Region Replication only copies new or updated objects. Deletions are replicated only if delete marker replication is enabled. Otherwise, deleting a file in the source bucket does not affect the destination bucket.
+
+7. What is Virtualization?
+
+Answer:
+Virtualization is a technology that allows multiple virtual machines (VMs) to run on a single physical server. Each VM has its own operating system and resources. This is achieved using a hypervisor.
+
+Example: VMware, VirtualBox, AWS EC2
+
+8. What is Containerization?
+
+Answer:
+Containerization packages an application along with its dependencies into a container. Containers share the host OS kernel, making them lightweight, fast, and portable across environments.
+
+Example: Docker containers
+
+9. What is a Dockerfile?
+
+Answer:
+A Dockerfile is a text file that contains step-by-step instructions to build a Docker image. It defines the base image, dependencies, environment, and commands required to run an application.
+
+10. Could you please write a Dockerfile?
+
+Answer:
+
+FROM node:18
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+CMD ["npm", "start"]
+
+
+Explanation:
+
+FROM selects the base image
+
+WORKDIR sets the working directory
+
+COPY copies files into the container
+
+RUN installs dependencies
+
+CMD starts the application
+
+11. What is a Docker network?
+
+Answer:
+
+A Docker network allows Docker containers to communicate with each other and with the outside world. It provides isolation, DNS-based service discovery, and controlled communication between containers.
+
+Docker networks help in:
+
+Container-to-container communication
+
+Exposing containers to external traffic
+
+Isolating applications for security
+
+12. What is the default Docker network?
+
+Answer:
+
+The default Docker network is called bridge.
+
+When Docker is installed:
+
+A bridge network is created automatically
+
+Containers launched without specifying a network are attached to it
+
+Other default networks:
+
+bridge – Default for containers
+
+host – Container uses host network directly
+
+none – No network access
+
+13. How do you create a Docker network?
+
+Answer:
+
+You can create a Docker network using the following command:
+
+docker network create my-network
+
+
+To list networks:
+
+docker network ls
+
+
+To connect a container to the network:
+
+docker run --network my-network nginx
+
+
+This allows containers on the same network to communicate using container names.
+
+14. How do you create a Docker container?
+
+Answer:
+
+A Docker container is created from a Docker image using the docker run command.
+
+Example:
+
+docker run -d -p 80:80 nginx
+
+
+Explanation:
+
+-d → Run in detached mode
+
+-p → Port mapping (host:container)
+
+nginx → Image name
+
+15. How do you run a Dockerfile? Please give the commands.
+
+Answer:
+
+To run a Dockerfile, follow two steps:
+
+Step 1: Build the image
+
+docker build -t my-app .
+
+
+Step 2: Run the container
+
+docker run -p 3000:3000 my-app
+
+
+Docker reads the Dockerfile, builds an image, and runs it as a container.
+
+16. What is a Deployment in Kubernetes?
+
+Answer:
+
+A Deployment in Kubernetes manages stateless applications. It ensures that the desired number of pods are running and handles:
+
+Scaling
+
+Rolling updates
+
+Rollbacks
+
+Self-healing
+
+Deployments are commonly used for frontend and backend applications.
+
+17. How would you explain a Kubernetes Pod to a 5-year-old child?
+
+Answer:
+
+A Pod is like a small box that contains one or more toys (containers).
+All toys in the box share the same space and talk to each other easily.
+
+In Kubernetes:
+
+Pod is the smallest unit
+
+It holds one or more containers
+
+Containers in a Pod share network and storage
+
+18. What are the types of Deployments in Kubernetes?
+
+Answer:
+
+Kubernetes supports different deployment strategies:
+
+Rolling Update – Updates pods gradually (default)
+
+Recreate – Deletes all old pods before creating new ones
+
+Blue-Green Deployment – Switches traffic between old and new versions
+
+Canary Deployment – Releases to a small set of users first
+
+19. What is a StatefulSet in Kubernetes?
+
+Answer:
+
+A StatefulSet is used for stateful applications that need:
+
+Stable network identity
+
+Persistent storage
+
+Ordered startup and shutdown
+
+Examples:
+
+Databases (MySQL, MongoDB)
+
+Kafka
+
+Elasticsearch
+
+Each pod gets a fixed name and storage.
+
+20. What is a DaemonSet, and how is it used?
+
+Answer:
+
+A DaemonSet ensures that one pod runs on every node in the cluster.
+
+Use cases:
+
+Log collection (Fluentd)
+
+Monitoring agents (Prometheus Node Exporter)
+
+Security agents
+
+When a new node is added, the DaemonSet automatically runs a pod on it.
+
+21. What is a Service in Kubernetes?
+
+Answer:
+
+A Service in Kubernetes is an abstraction that provides a stable network endpoint to access a group of Pods.
+Since Pods are dynamic and can be created or destroyed, their IP addresses change. A Service solves this problem by providing a fixed IP and DNS name.
+
+Types of Services:
+
+ClusterIP – Accessible only inside the cluster (default)
+
+NodePort – Exposes service on a port of each node
+
+LoadBalancer – Exposes service using a cloud load balancer
+
+ExternalName – Maps service to an external DNS name
+
+22. What is a LoadBalancer and an Ingress Controller in Kubernetes?
+
+Answer:
+
+A LoadBalancer service exposes applications to the internet using a cloud provider’s load balancer (AWS ELB, GCP LB). Each service gets its own external IP.
+
+An Ingress Controller manages external HTTP/HTTPS access to services using routing rules like host-based and path-based routing.
+
+Ingress Controller examples:
+
+NGINX Ingress
+
+Traefik
+
+HAProxy
+
+23. What is the difference between a LoadBalancer and an Ingress Controller?
+
+Answer:
+
+LoadBalancer	Ingress Controller
+One load balancer per service	Single load balancer for multiple services
+Expensive in cloud	Cost-effective
+Simple setup	Advanced routing
+Layer 4	Layer 7 (HTTP/HTTPS)
+
+Conclusion:
+Ingress is preferred for production environments with multiple services.
+
+24. Can you create a Pod without a Deployment?
+
+Answer:
+
+Yes, a Pod can be created without a Deployment by using a Pod YAML file.
+
+Example:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+
+However, Pods created this way:
+
+Are not self-healing
+
+Do not support scaling or rolling updates
+
+Therefore, Deployments are recommended.
+
+25. Can you write a Terraform script? Please write a Terraform script for EC2 and S3.
+
+Answer:
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "my_ec2" {
+  ami           = "ami-0f5ee92e2d63afc18"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "MyEC2"
+  }
+}
+
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "my-terraform-demo-bucket-123"
+  acl    = "private"
+}
+
+
+This script creates:
+
+One EC2 instance
+
+One private S3 bucket
+
+26. Briefly explain the Terraform script you wrote.
+
+Answer:
+
+provider block defines the cloud provider and region
+
+aws_instance resource creates an EC2 instance
+
+ami defines the OS image
+
+instance_type defines server size
+
+aws_s3_bucket creates an S3 bucket
+
+Terraform ensures infrastructure as code and reproducibility
+
+27. How do you set up Kubernetes on AWS using EKS?
+
+Answer:
+
+Steps to set up Kubernetes using Amazon EKS:
+
+Create an EKS cluster using AWS Console, CLI, or Terraform
+
+Create a node group (EC2 instances)
+
+Configure kubectl using:
+
+aws eks update-kubeconfig --name cluster-name
+
+
+Deploy applications using Kubernetes YAML files
+
+Use LoadBalancer or Ingress for external access
+
+EKS provides a managed Kubernetes control plane with high availability.
