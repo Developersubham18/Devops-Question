@@ -1,0 +1,460 @@
+Q1. What are the different ways to create a Kubernetes cluster?
+Answer:
+
+There are multiple ways to create a Kubernetes cluster depending on learning, testing, or production needs.
+
+Ways to create a cluster:
+
+Minikube – Local Kubernetes for learning and practice
+
+KIND (Kubernetes in Docker) – Lightweight clusters, mainly for CI/CD testing
+
+k3s – Lightweight Kubernetes for edge devices and small production setups
+
+kubeadm – Official Kubernetes tool to create production-grade clusters manually
+
+Cloud-managed Kubernetes
+
+Amazon EKS
+
+Google GKE
+
+Azure AKS
+
+Enterprise Kubernetes platforms
+
+OpenShift
+
+Rancher
+
+Infrastructure as Code
+
+Terraform
+
+Ansible
+
+Best learning path:
+Minikube → kubeadm → Cloud Kubernetes (EKS/GKE/AKS)
+
+Q2. How to check whether Minikube is installed or not?
+Answer:
+
+Run the following command:
+
+minikube version
+
+
+If Minikube is installed, it will display the version.
+
+Other useful commands:
+
+minikube status
+kubectl version --client
+kubectl get nodes
+
+Q3. I have a React frontend Docker image on Docker Hub. How do I deploy it on Kubernetes using Minikube?
+Answer:
+
+Steps:
+
+Start Minikube:
+
+minikube start
+
+
+Create a Deployment YAML:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: react
+  template:
+    metadata:
+      labels:
+        app: react
+    spec:
+      containers:
+      - name: react
+        image: <dockerhub-username>/<image-name>:tag
+        ports:
+        - containerPort: 80
+
+
+Create a Service YAML:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-service
+spec:
+  type: NodePort
+  selector:
+    app: react
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30007
+
+
+Apply the files:
+
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+
+
+Access the application:
+
+minikube service react-service
+
+Q4. Why do we create a Deployment YAML instead of a Pod YAML?
+Answer:
+
+Pods are not self-healing, while Deployments manage Pods automatically.
+
+Problems with creating Pods directly:
+
+No automatic restart
+
+No scaling
+
+No rolling updates
+
+Not suitable for production
+
+Benefits of Deployment:
+
+Self-healing
+
+Auto-scaling
+
+Rolling updates
+
+Rollback support
+
+Best practice: Use Deployments for real applications, not standalone Pods.
+
+Q5. Can we create a Pod YAML first and then a Deployment YAML?
+Answer:
+
+Technically yes, but practically it is not recommended.
+
+Reason:
+
+Deployments do not adopt existing Pods
+
+Deployment creates new Pods through a ReplicaSet
+
+You end up with duplicate and unmanaged Pods
+
+Correct approach: Create only a Deployment, not Pod plus Deployment.
+
+Q6. What is the use of Service YAML in Kubernetes?
+Answer:
+
+A Service provides a stable network endpoint to access Pods.
+
+Without a Service:
+
+Pod IPs change when Pods restart
+
+Applications break if they depend on Pod IPs
+
+Service provides:
+
+Stable IP and DNS name
+
+Load balancing
+
+Communication using labels and selectors
+
+Internal or external access to applications
+
+Q7. How does a Service work internally?
+Answer:
+
+A Service routes traffic to Pods using labels.
+
+Flow:
+
+Client → Service → Pod 1
+                → Pod 2
+                → Pod 3
+
+
+Pods can be recreated, but the Service endpoint remains stable.
+
+Q8. What are the types of Kubernetes Services?
+Answer:
+Service Type	Use Case
+ClusterIP	Internal communication between services
+NodePort	External access for learning and testing
+LoadBalancer	Cloud production environments
+ExternalName	Map service to external DNS
+Q9. What happens if a Service is deleted?
+Answer:
+
+Pods continue running
+
+Application becomes unreachable because there is no stable endpoint
+
+Q10. What is the relationship between Deployment, ReplicaSet, and Pod?
+Answer:
+Deployment
+   ↓
+ReplicaSet
+   ↓
+Pods
+
+
+Deployment manages ReplicaSet
+
+ReplicaSet ensures the correct number of Pods
+
+Pods run the actual containers
+
+Q11. When should we create Pods directly?
+Answer:
+
+Creating Pods directly should be limited to:
+
+Learning purposes
+
+Debugging
+
+Temporary testing
+
+Direct Pod creation is not recommended for production workloads.
+
+Q12. Why is a Service required even if a Pod already has an IP?
+Answer:
+
+Pod IPs are temporary and change when Pods restart or are rescheduled.
+A Service provides a permanent IP and DNS name so applications can reliably communicate.
+
+
+Q13. What is the difference between Service and Ingress in Kubernetes?
+Answer:
+
+Both Service and Ingress are used to expose applications, but they work at different layers.
+
+Service:
+
+Works at Layer 4 (TCP/UDP)
+
+Exposes Pods using IP and port
+
+Types: ClusterIP, NodePort, LoadBalancer
+
+Does not support routing by URL path or domain
+
+Ingress:
+
+Works at Layer 7 (HTTP/HTTPS)
+
+Provides routing based on:
+
+Domain name
+
+URL path
+
+Requires an Ingress Controller
+
+Used mainly for HTTP/HTTPS traffic
+
+
+Q14. What is the difference between ClusterIP, NodePort, and LoadBalancer?
+Answer:
+
+These are types of Kubernetes Services, defining how the application is exposed.
+
+1. ClusterIP
+
+Default Service type
+
+Accessible only inside the cluster
+
+Used for internal communication
+
+Example use case:
+Frontend → Backend
+
+2. NodePort
+
+Exposes app on a static port on each node
+
+Accessible using:
+
+NodeIP:NodePort
+
+
+Mainly used for learning and testing
+
+Limitations:
+
+Port range is limited
+
+Not ideal for production
+
+3. LoadBalancer
+
+Creates a cloud load balancer
+
+Provides external IP automatically
+
+Used in cloud platforms (AWS, GCP, Azure)
+
+
+Q15. How do labels and selectors work in Kubernetes?
+Answer:
+
+Labels and selectors are used to connect Kubernetes resources.
+
+Labels:
+
+Key-value pairs attached to resources
+
+Used for identification and grouping
+
+Example:
+
+labels:
+  app: react
+  tier: frontend
+
+Selectors:
+
+Used by Services, Deployments, ReplicaSets
+
+Match Pods based on labels
+
+Example:
+
+selector:
+  app: react
+
+How they work together:
+
+Pods have labels
+
+Service or Deployment uses selectors
+
+Kubernetes connects them automatically
+
+Example Flow:
+Service selector → Matches Pod labels → Routes traffic
+
+Q16. Why are labels and selectors important?
+Answer:
+
+They enable:
+
+Service-to-Pod communication
+
+Load balancing
+
+Scaling
+
+Zero-downtime updates
+
+Without labels and selectors, Kubernetes resources cannot communicate correctly.
+
+Q17. What is an Ingress Controller?
+Answer:
+
+An Ingress Controller is a component that implements Ingress rules.
+
+Ingress by itself does nothing unless an Ingress Controller is running.
+
+Role of Ingress Controller:
+
+Watches Ingress resources
+
+Configures a reverse proxy (NGINX, Traefik, HAProxy)
+
+Routes HTTP/HTTPS traffic to Services
+
+Common Ingress Controllers:
+
+NGINX Ingress Controller
+
+Traefik
+
+HAProxy
+
+Cloud-specific controllers (AWS ALB Ingress)
+
+Q18. Why is an Ingress Controller required?
+Answer:
+
+Because Kubernetes does not handle HTTP routing by default.
+
+Ingress Controller provides:
+
+Path-based routing
+
+Host-based routing
+
+SSL/TLS termination
+
+Centralized traffic management
+
+Without an Ingress Controller:
+
+Ingress resources will not work
+
+Traffic will not reach Services
+
+Q19. How does traffic flow with Ingress?
+Answer:
+Browser
+   ↓
+Ingress Controller
+   ↓
+Ingress Rules
+   ↓
+Service
+   ↓
+Pod
+
+
+Ingress Controller acts as a smart reverse proxy.
+
+Q20. When should you use Service and when should you use Ingress?
+Answer:
+Scenario	Use
+Pod-to-Pod communication	Service (ClusterIP)
+External testing	NodePort
+Cloud production access	LoadBalancer
+HTTP routing with domains	Ingress
+Multiple apps on one IP	Ingress
+Q21. Can Ingress replace Service?
+Answer:
+
+No.
+
+Ingress works on top of Services.
+
+Flow:
+
+Ingress → Service → Pod
+
+
+Service is mandatory; Ingress is optional and used only for HTTP/HTTPS routing.
+
+Q22. What is the correct exposure strategy in real projects?
+Answer:
+
+Backend services: ClusterIP
+
+Frontend services: ClusterIP
+
+External access: Ingress
+
+Cloud entry point: LoadBalancer (or ALB)
+
+This is the industry-standard Kubernetes architecture.
