@@ -1,0 +1,234 @@
+Terraform – Interview Questions and Answers
+1. How do you connect Terraform with AWS?
+
+Terraform connects to AWS using the AWS Provider, which allows Terraform to interact with AWS APIs.
+
+Steps:
+
+Install Terraform on the system
+
+Configure AWS credentials
+
+Define the AWS provider in Terraform configuration
+
+Example:
+provider "aws" {
+  region = "ap-south-1"
+}
+
+AWS credentials can be provided using:
+
+AWS CLI (aws configure)
+
+Environment variables
+
+IAM Roles (recommended for EC2 and CI/CD pipelines)
+
+Best Practice: Always use IAM roles instead of hardcoding access keys.
+
+2. How do you design a CI/CD pipeline for Terraform code?
+
+A CI/CD pipeline for Terraform automates infrastructure provisioning.
+
+Typical Pipeline Flow:
+
+Developer pushes Terraform code to GitHub
+
+Jenkins pipeline gets triggered
+
+Terraform commands are executed automatically
+
+Pipeline Stages:
+
+terraform init – Initializes backend and providers
+
+terraform validate – Validates configuration syntax
+
+terraform plan – Shows execution plan
+
+terraform apply – Creates or updates infrastructure
+
+Best Practices:
+
+Use separate pipelines for dev, staging, and production
+
+Use remote backend like S3 with DynamoDB locking
+
+Keep manual approval for production apply
+
+3. What is the difference between count and for_each in Terraform?
+count	for_each
+Uses numeric index	Uses keys from map or set
+Accessed using count.index	Accessed using each.key
+Resource recreation on change	Stable resource management
+Less readable	More readable and flexible
+
+Use for_each when resources are uniquely identifiable.
+
+4. What types of conditional expressions have you used in Terraform?
+
+Terraform uses ternary conditional expressions.
+
+Syntax:
+condition ? true_value : false_value
+
+Example:
+instance_type = var.env == "prod" ? "t2.medium" : "t2.micro"
+
+Used for:
+
+Environment-based configurations
+
+Enabling or disabling resources
+
+Cost optimization
+
+5. If a VPC and subnets are already created manually, how do you create an EC2 instance inside them using Terraform?
+
+Terraform uses data sources to fetch existing resources.
+
+Steps:
+
+Fetch existing VPC and subnet using data sources
+
+Reference them while creating EC2
+
+Example:
+data "aws_vpc" "existing" {
+  id = "vpc-123456"
+}
+
+data "aws_subnet" "existing" {
+  id = "subnet-123456"
+}
+
+resource "aws_instance" "ec2" {
+  ami           = "ami-0abcdef"
+  instance_type = "t2.micro"
+  subnet_id     = data.aws_subnet.existing.id
+}
+
+
+Data sources allow Terraform to work with existing infrastructure safely.
+
+6. How do you securely pass secrets or sensitive data to Terraform?
+Secure Methods:
+
+Environment variables (TF_VAR_)
+
+AWS Secrets Manager
+
+AWS SSM Parameter Store
+
+Terraform variables with sensitive = true
+
+Example:
+variable "db_password" {
+  sensitive = true
+}
+
+
+Never hardcode secrets in Terraform files or commit them to GitHub.
+
+GitHub – Interview Questions and Answers
+7. What branching strategy do you follow in GitHub repositories?
+
+A commonly used branching strategy includes:
+
+main branch for production
+
+develop branch for integration
+
+feature/* branches for development
+
+hotfix/* branches for urgent fixes
+
+Flow:
+feature → develop → main
+
+
+This ensures controlled releases and clean version management.
+
+8. How do you integrate GitHub with Jenkins for automated builds?
+Steps:
+
+Install GitHub plugin in Jenkins
+
+Add GitHub repository URL in Jenkins job
+
+Configure a webhook in GitHub
+
+Enable “GitHub hook trigger” in Jenkins
+
+Whenever code is pushed to GitHub, Jenkins automatically triggers the build.
+
+9. What is the difference between Webhook and Poll SCM in Jenkins?
+Webhook	Poll SCM
+Event-based trigger	Time-based polling
+Instant build trigger	Delayed execution
+Efficient	Resource-consuming
+Recommended	Not recommended
+
+Webhook is preferred in real-world CI/CD pipelines.
+
+Jenkins – Interview Questions and Answers
+10. How do you integrate SonarQube with Jenkins for code quality analysis?
+Steps:
+
+Install SonarQube plugin in Jenkins
+
+Configure SonarQube server in Jenkins global settings
+
+Add SonarQube stage in Jenkins pipeline
+
+Example:
+stage('SonarQube Analysis') {
+  sh 'mvn sonar:sonar'
+}
+
+
+This helps identify bugs, code smells, and security vulnerabilities.
+
+11. How do you manage credentials securely in Jenkins and reference them in pipelines?
+
+Jenkins stores credentials securely in its credentials store.
+
+Types:
+
+Username and password
+
+SSH keys
+
+Tokens
+
+Secret text
+
+Usage in pipeline:
+withCredentials([string(credentialsId: 'aws-key', variable: 'AWS_KEY')]) {
+  sh 'echo $AWS_KEY'
+}
+
+
+Credentials are encrypted and masked in logs.
+
+12. What are parallel stages in Jenkins pipelines, and when do you use them?
+
+Parallel stages allow multiple pipeline stages to run simultaneously.
+
+Example:
+parallel {
+  stage('Unit Tests') {
+    sh 'mvn test'
+  }
+  stage('Security Scan') {
+    sh 'trivy fs .'
+  }
+}
+
+Used when:
+
+Tasks are independent
+
+Pipeline execution time needs to be reduced
+
+Multiple checks can run together
